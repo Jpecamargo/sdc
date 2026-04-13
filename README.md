@@ -74,47 +74,55 @@ SDC installs four global slash commands into Claude Code. After running `/sdc.in
 
 ### The workflow
 
+`/clarify` is the single entry point for new features. It orchestrates the full pipeline automatically — the only moments it stops are the two gates that require your input.
+
 ```
-/clarify → architect → tdd → backend ∥ frontend → /refine → /test → /commit → /pr → docs
+/clarify → architect → [gate: spec approval] → tdd → backend ∥ frontend → refine → test → [gate: manual validation] → docs → commit → /pr
 ```
 
 | Step | Who | What happens |
 |------|-----|-------------|
-| `/sdc.clarify` | You + Claude | Describe the feature. Claude asks targeted questions to resolve ambiguities and evaluates if the scope fits one spec or should be split. |
-| `architect` | Agent (opus) | Writes the full spec in `docs/specs/`. Presents a summary and **waits for your explicit approval** before anything is implemented. |
-| `tdd` | Agent (sonnet) | Writes tests from the acceptance criteria — before the implementation exists. Tests fail until the code is written; that's expected. |
-| `backend` + `frontend` | Agents (sonnet) | Implement in parallel using the approved spec as the contract. No coordination needed between them. |
-| `/refine` | Inline | Code review: architecture violations, security, naming, missing error handling. |
-| `/test` | Inline | Compile + lint + run tests. |
-| `/commit` | Inline | Semantic commit for the phase. |
-| `/pr` | Inline (haiku) | Open a pull request to the configured base branch. Skipped if PR workflow is not enabled. |
-| `docs` | Agent (haiku) | Updates `CLAUDE.md` and agents to reflect structural changes. |
+| `/clarify` | You + Claude | Describe the feature. Claude asks targeted questions, evaluates scope, and produces a consolidated brief. |
+| `architect` | Agent (opus) | Checks for reusable code (DRY) and applicable design patterns before writing the full spec in `docs/specs/`. |
+| **[gate]** | **You** | **Review and approve the spec. Request changes or cancel if needed.** |
+| `tdd` | Agent (sonnet) | Writes tests from the acceptance criteria — before the implementation exists. |
+| `backend` + `frontend` | Agents (sonnet) | Implement in parallel using the approved spec as the contract. |
+| refine | Inline | Code review: architecture, DRY, security, naming, error handling. Violations are fixed immediately. |
+| test | Inline | Compile + lint + run tests. Failures are fixed before moving on. |
+| **[gate]** | **You** | **Test the feature manually. Request adjustments if needed. Confirm when ready.** |
+| `docs` | Agent (haiku) | Updates `CLAUDE.md` to reflect structural changes. |
+| commit | Inline | Semantic commit. |
+| `/pr` | Inline (haiku) | Opens a pull request to the configured base branch. Skipped if PR workflow is not enabled. |
+
+### For bugs and adjustments
+
+Use `/orchestrate` for anything that isn't a new feature.
+
+| Situation | Flow |
+|-----------|------|
+| Backend bug | backend → test → commit |
+| Frontend / UI bug | frontend → test → commit |
+| Visual change | design → frontend → test → commit |
+| Refactor | refine → test → commit |
+| Outdated docs | docs → commit |
+
+If PR workflow is active, `/pr` is added after commit in all flows.
 
 ### PR Workflow (optional)
 
-When enabled during `/sdc.init` or `/sdc.upgrade`, every feature starts on a new branch and ends with a pull request.
+When enabled during `/sdc.init` or `/sdc.upgrade`, every feature starts on a dedicated branch and ends with a pull request.
 
-**Setup:** during init, answer yes to "PR workflow?" and provide a base branch (e.g. `main`). This adds a `## PR Workflow` section to `CLAUDE.md` that stores the base branch.
+**Setup:** during init, answer yes to "PR workflow?" and provide a base branch (e.g. `main`). This adds a `## PR Workflow` section to `CLAUDE.md`.
 
-**Branch creation:** `/orchestrate` detects if you're on the base branch and prompts for a feature branch name before starting any work.
+**Branch creation:** `/clarify` and `/orchestrate` detect if you're on the base branch and prompt for a feature branch name before starting any work.
 
-**Opening the PR:** run `/pr` when ready. It pushes the branch if needed and runs `gh pr create` against the configured base branch. You can override the base branch ad hoc:
+**Base branch override:** pass it as an argument when needed:
 
 ```
 /pr develop
 ```
 
-**With git worktree:** the PR must be opened before merging the worktree back to root. `/pr` reminds you to remove the worktree after merge.
-
-### For bugs and adjustments
-
-| Situation | Flow |
-|-----------|------|
-| Backend bug | backend → /test → /commit |
-| Frontend / UI bug | frontend → /test → /commit |
-| Visual change | design → frontend → /test → /commit |
-| Refactor | /refine → /test → /commit |
-| Outdated docs | docs → /commit |
+**With git worktree:** the PR is opened before merging the worktree back to root. After merge, remove the worktree with `git worktree remove <path>`.
 
 ---
 
@@ -125,10 +133,10 @@ When the project uses git worktree, multiple features can be developed simultane
 **The rule:** finish the spec phase before starting implementation. Once implementation starts, a new session can begin the next spec.
 
 ```
-Session A:  /sdc.clarify → architect → [approval] → tdd → backend ∥ frontend → ...
-                                            ↓
-                               Session B can now start:
-                               /sdc.clarify → architect → [approval] → tdd → ...
+Session A:  /clarify → architect → [approval] → tdd → backend ∥ frontend → ...
+                                       ↓
+                          Session B can now start:
+                          /clarify → architect → [approval] → tdd → ...
 ```
 
 - **One spec at a time** — don't start speccing a new feature until the current one is approved
@@ -157,15 +165,15 @@ See the [quick install](#installation) at the top.
 ```
 .claude/
 ├── agents/
-│   ├── architect.md    # opus   — specs, contracts, acceptance criteria
+│   ├── architect.md    # opus   — DRY check, design patterns, spec writing
 │   ├── tdd.md          # sonnet — tests from acceptance criteria
 │   ├── backend.md      # sonnet — your backend stack
 │   ├── frontend.md     # sonnet — your frontend stack (if applicable)
 │   ├── design.md       # sonnet — design system specs
 │   └── docs.md         # haiku  — keeps CLAUDE.md in sync
 └── commands/
-    ├── orchestrate.md  # routes requests to the right agent
-    ├── clarify.md      # resolves ambiguities before spec
+    ├── clarify.md      # full feature pipeline (entry point for new features)
+    ├── orchestrate.md  # routes bugs, adjustments and refactors
     ├── commit.md       # haiku  — semantic commits
     ├── test.md         # compile + lint + test
     ├── refine.md       # code review and violation fixes

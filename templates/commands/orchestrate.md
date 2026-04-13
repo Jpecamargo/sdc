@@ -1,24 +1,22 @@
 ---
-description: Classifica a solicitação e define qual agente ou skill acionar.
+description: Classifica bugs, ajustes e refatorações e define qual agente acionar. Para features novas, use /clarify.
 ---
 
 Classifique a solicitação e defina o fluxo. Execute sem pedir confirmação a menos que a solicitação seja ambígua.
 
-## Fluxo spec-driven (features não-triviais)
+> **Features novas:** use `/clarify`. O `orchestrate` cobre apenas bugs, ajustes e refatorações.
 
-```
-/clarify → architect → tdd → backend ∥ frontend → /refine → /test → /commit → docs
-```
+## PR Workflow
 
-Use este fluxo quando a feature cria novos endpoints, novas telas ou módulos inexistentes.
+Verifique se o `CLAUDE.md` contém `## PR Workflow`.
 
-**Spec já aprovada?** Pule clarify e architect — direto para tdd.
+**Se sim:**
+1. `git branch --show-current`
+2. Leia a branch base do `CLAUDE.md`
+3. Se estiver na branch base: peça ao usuário o nome da branch e execute `git checkout -b <nome>`
+4. Se já estiver em branch de feature: continue
 
-**O architect sempre aguarda aprovação explícita do usuário antes de avançar para tdd.** Não pule esse gate.
-
-**Regra de paralelismo:** a fase de spec (clarify → architect → aprovação) deve ser concluída antes de iniciar a implementação. Uma vez que o tdd começa, o usuário está livre para iniciar a spec da próxima feature em outra sessão. Nunca inicie a implementação sem spec aprovada.
-
-## Fluxo direto (bugs, ajustes, refatorações)
+## Fluxo por tipo de solicitação
 
 | Solicitação | Fluxo |
 |-------------|-------|
@@ -30,58 +28,28 @@ Use este fluxo quando a feature cria novos endpoints, novas telas ou módulos in
 | Documentação desatualizada | docs → /commit |
 | Dúvida de arquitetura | architect |
 
+Se PR workflow estiver ativo: adicione `/pr` após o commit.
+
 ## Regras de execução
 
-- Leia os arquivos relevantes antes de classificar um bug — nunca assuma a causa
-- backend + frontend podem rodar em paralelo quando o contrato da spec está aprovado
-- Inclua no prompt de cada agente: caminho da spec, arquivos já alterados, decisões tomadas
-- Se a solicitação for simples (bug óbvio, ajuste visual), execute diretamente
-
-## PR Workflow
-
-Antes de iniciar qualquer implementação, verifique se o `CLAUDE.md` contém a seção `## PR Workflow`.
-
-**Se sim:**
-1. Execute `git branch --show-current` para identificar a branch atual
-2. Leia a **branch base** configurada no `CLAUDE.md` (ex: `main`)
-3. Se branch atual == branch base: pergunte ao usuário o nome da nova branch e execute:
-   ```bash
-   git checkout -b <nome-da-branch>
-   ```
-4. Se branch atual != branch base: continue — já está numa branch de feature
-
-Esta verificação é obrigatória e deve ocorrer antes de invocar o architect (features) ou qualquer agente de implementação (bugs/ajustes).
+- Leia os arquivos relevantes antes de classificar — nunca assuma a causa
+- backend + frontend podem rodar em paralelo quando o contrato já está definido
+- Inclua no prompt de cada agente: arquivos relevantes, comportamento esperado, comportamento atual
 
 ## Git Worktree
 
-Antes de invocar qualquer agente após o architect, verifique se o `CLAUDE.md` contém a seção `## Git Worktree`.
+Antes de invocar qualquer agente, verifique se o `CLAUDE.md` contém `## Git Worktree`.
 
-**Se sim:** use `isolation: "worktree"` em todos os agentes invocados a partir do tdd — sem exceção. Isso inclui tdd, backend e frontend.
+**Se sim:** use `isolation: "worktree"` em todos os agentes invocados.
 
-```
-# tdd
-Agent(subagent_type="tdd", isolation="worktree", prompt="...")
+**Se não:** invoque normalmente.
 
-# backend e frontend em paralelo
-Agent(subagent_type="backend", isolation="worktree", prompt="...")
-Agent(subagent_type="frontend", isolation="worktree", prompt="...")
-```
+## Governança: subagente ou inline?
 
-**Se não:** invoque os agentes normalmente, sem `isolation`.
+- **Subagente** → tarefa longa, muitos arquivos, pode rodar em paralelo
+- **Inline** → tarefa curta, beneficia do contexto da conversa
 
-Esta verificação é obrigatória e deve ser feita antes de cada invocação pós-architect. Não assuma — leia o `CLAUDE.md`.
-
-## Governança: antes de criar novo agente ou skill
-
-**1. Subagente ou skill?**
-- Subagente → tarefa longa, muitos arquivos, isolamento útil, pode rodar em paralelo
-- Skill → tarefa curta, beneficia do contexto da conversa, roda inline
-
-**2. A skill precisa de subagentes internos?**
-- Sim → partes independentes que ganham com paralelismo
-- Não → Claude já tem contexto, tarefa focada
-
-**3. Qual modelo?**
-- haiku → mecânico (commits, lint, markdown sem julgamento)
-- sonnet → implementação, code review, planejamento moderado
+Modelo por complexidade:
+- haiku → mecânico (commits, lint, markdown)
+- sonnet → implementação, code review
 - opus → decisões arquiteturais, trade-offs complexos

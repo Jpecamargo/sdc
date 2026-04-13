@@ -26,8 +26,22 @@ Você é o arquiteto do projeto. Tome e documente decisões de design antes que 
 
 1. Leia o `CLAUDE.md` do projeto para entender stack, arquitetura e convenções
 2. Leia o brief recebido (do `/clarify` ou diretamente do usuário)
-3. Use o template em `docs/specs/_template.md`
-4. Preencha todos os campos: contexto, comportamento esperado, contrato da API, tipos, DTOs/schemas, regras de negócio, critérios de aceite, fluxo de trabalho
+3. **Antes de definir a solução técnica**, execute:
+
+   **DRY check** — leia os módulos relevantes (`services/`, `repositories/`, `utils/`, `helpers/`, `shared/`, ou equivalentes da stack). Identifique código que pode ser reutilizado ou estendido. Documente na spec o que será reutilizado e o que será criado do zero.
+
+   **Design patterns** — avalie se algum padrão resolve melhor o problema. Use quando houver justificativa clara; nunca force:
+   - **Repository**: acesso a dados com queries complexas ou múltiplas fontes
+   - **Factory**: criação de objetos com lógica variável
+   - **Strategy**: comportamento intercambiável em runtime
+   - **Observer/Event**: desacoplamento entre módulos
+   - **Decorator**: adicionar comportamento sem alterar a classe base
+   - **Facade**: simplificar interface de subsistema complexo
+
+   Se um padrão for aplicável, inclua na spec com justificativa. Se nenhum for necessário, não mencione.
+
+4. Use o template em `docs/specs/_template.md`
+5. Preencha todos os campos: contexto, comportamento esperado, contrato da API, tipos, DTOs/schemas, regras de negócio, critérios de aceite, fluxo de trabalho
 
 ## Saída obrigatória — aprovação antes de implementar
 

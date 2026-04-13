@@ -27,6 +27,7 @@ Apresente o que foi detectado e faça as perguntas em uma única mensagem:
 1. **Backend**: NestJS / Express / FastAPI / Django / Rails / nenhum _(detectado: X)_
 2. **Frontend**: Next.js / React+Vite / Angular / Vue / nenhum _(detectado: X)_
 3. **Git worktree**: o projeto usará worktrees para desenvolvimento paralelo de features? (sim/não)
+4. **PR workflow**: o projeto usará pull requests para integrar mudanças? (sim/não) — se sim, qual é a branch base? (ex: `main`)
 
 Aguarde as respostas antes de prosseguir.
 
@@ -61,6 +62,7 @@ Leia cada arquivo em `~/.claude/sdc-templates/commands/` e escreva em `.claude/c
 - `commit.md`
 - `test.md`
 - `refine.md`
+- `pr.md`
 
 ## Passo 6 — Copiar spec template
 
@@ -153,6 +155,19 @@ Specs ficam em `docs/specs/YYYY-MM-DD-<nome>.md`. Template: `docs/specs/_templat
 | /commit | Commit semântico |
 ```
 
+Se o projeto usar **PR workflow**, adicione ao CLAUDE.md:
+
+```markdown
+## PR Workflow
+
+Este projeto usa pull requests para integrar mudanças.
+
+- **Branch base**: <branch informada pelo usuário>
+
+Fluxo: criar branch → implementar → commit → `/pr` → merge
+Com worktree: abrir o PR antes de unir ao worktree raiz.
+```
+
 Se o projeto usar **git worktree**, adicione ao CLAUDE.md:
 
 ```markdown
@@ -179,3 +194,6 @@ Liste todos os arquivos criados. Exiba:
 > "Projeto inicializado. Próximos passos:
 > 1. Revise e adapte o `CLAUDE.md` com detalhes específicos do projeto (módulos existentes, env vars, convenções reais).
 > 2. Para iniciar uma feature, use `/clarify` para descrever o que quer construir."
+
+Se PR workflow foi ativado, acrescente:
+> "3. Ao finalizar uma feature, use `/pr` para abrir o pull request para `<branch-base>`."

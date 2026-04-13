@@ -49,7 +49,7 @@ for agent in architect tdd design docs \
 done
 
 # Command templates
-for cmd in orchestrate clarify commit test refine; do
+for cmd in orchestrate clarify commit test refine pr; do
   download "templates/commands/${cmd}.md" "$TEMPLATES_DIR/commands/${cmd}.md"
 done
 

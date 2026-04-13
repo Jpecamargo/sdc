@@ -75,7 +75,7 @@ SDC installs four global slash commands into Claude Code. After running `/sdc.in
 ### The workflow
 
 ```
-/clarify → architect → tdd → backend ∥ frontend → /refine → /test → /commit → docs
+/clarify → architect → tdd → backend ∥ frontend → /refine → /test → /commit → /pr → docs
 ```
 
 | Step | Who | What happens |
@@ -87,7 +87,24 @@ SDC installs four global slash commands into Claude Code. After running `/sdc.in
 | `/refine` | Inline | Code review: architecture violations, security, naming, missing error handling. |
 | `/test` | Inline | Compile + lint + run tests. |
 | `/commit` | Inline | Semantic commit for the phase. |
+| `/pr` | Inline (haiku) | Open a pull request to the configured base branch. Skipped if PR workflow is not enabled. |
 | `docs` | Agent (haiku) | Updates `CLAUDE.md` and agents to reflect structural changes. |
+
+### PR Workflow (optional)
+
+When enabled during `/sdc.init` or `/sdc.upgrade`, every feature starts on a new branch and ends with a pull request.
+
+**Setup:** during init, answer yes to "PR workflow?" and provide a base branch (e.g. `main`). This adds a `## PR Workflow` section to `CLAUDE.md` that stores the base branch.
+
+**Branch creation:** `/orchestrate` detects if you're on the base branch and prompts for a feature branch name before starting any work.
+
+**Opening the PR:** run `/pr` when ready. It pushes the branch if needed and runs `gh pr create` against the configured base branch. You can override the base branch ad hoc:
+
+```
+/pr develop
+```
+
+**With git worktree:** the PR must be opened before merging the worktree back to root. `/pr` reminds you to remove the worktree after merge.
 
 ### For bugs and adjustments
 
@@ -149,9 +166,10 @@ See the [quick install](#installation) at the top.
 └── commands/
     ├── orchestrate.md  # routes requests to the right agent
     ├── clarify.md      # resolves ambiguities before spec
-    ├── commit.md       # semantic commits
+    ├── commit.md       # haiku  — semantic commits
     ├── test.md         # compile + lint + test
-    └── refine.md       # code review and violation fixes
+    ├── refine.md       # code review and violation fixes
+    └── pr.md           # haiku  — open pull request (PR workflow only)
 
 docs/specs/
 └── _template.md        # spec template with all required sections

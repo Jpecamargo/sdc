@@ -37,6 +37,21 @@ Use este fluxo quando a feature cria novos endpoints, novas telas ou módulos in
 - Inclua no prompt de cada agente: caminho da spec, arquivos já alterados, decisões tomadas
 - Se a solicitação for simples (bug óbvio, ajuste visual), execute diretamente
 
+## PR Workflow
+
+Antes de iniciar qualquer implementação, verifique se o `CLAUDE.md` contém a seção `## PR Workflow`.
+
+**Se sim:**
+1. Execute `git branch --show-current` para identificar a branch atual
+2. Leia a **branch base** configurada no `CLAUDE.md` (ex: `main`)
+3. Se branch atual == branch base: pergunte ao usuário o nome da nova branch e execute:
+   ```bash
+   git checkout -b <nome-da-branch>
+   ```
+4. Se branch atual != branch base: continue — já está numa branch de feature
+
+Esta verificação é obrigatória e deve ocorrer antes de invocar o architect (features) ou qualquer agente de implementação (bugs/ajustes).
+
 ## Git Worktree
 
 Antes de invocar qualquer agente após o architect, verifique se o `CLAUDE.md` contém a seção `## Git Worktree`.

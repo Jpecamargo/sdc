@@ -42,9 +42,7 @@ download "commands/sdc.clarify.md" "$COMMANDS_DIR/sdc.clarify.md"
 download "commands/sdc.upgrade.md" "$COMMANDS_DIR/sdc.upgrade.md"
 
 # Agent templates
-for agent in architect tdd design docs \
-             backend-nestjs backend-express backend-fastapi backend-django backend-rails \
-             frontend-nextjs frontend-react-vite frontend-angular frontend-vue; do
+for agent in architect tdd design docs backend frontend; do
   download "templates/agents/${agent}.md" "$TEMPLATES_DIR/agents/${agent}.md"
 done
 

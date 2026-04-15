@@ -78,7 +78,22 @@ Nenhuma migração necessária. Continue.
 
 ---
 
-## Passo 4 — Atualizar agentes genéricos
+## Passo 4 — Permissões pré-configuradas (opcional)
+
+Se `.claude/settings.json` já existir: não toque.
+
+Se não existir, pergunte:
+
+> "Deseja usar permissões pré-configuradas? Isso permite que o Claude leia, edite e crie arquivos e rode comandos comuns de desenvolvimento (git, npm, pip, etc.) sem pedir confirmação a cada vez. Operações destrutivas como `sudo` e `rm -rf /` continuam bloqueadas.
+>
+> (sim/não)"
+
+- Se sim: leia `~/.claude/sdc-templates/settings.json` e escreva em `.claude/settings.json`
+- Se não: pule sem criar o arquivo
+
+---
+
+## Passo 5 — Atualizar agentes genéricos
 
 Para cada agente, leia de `~/.claude/sdc-templates/agents/` e sobrescreva em `.claude/agents/`:
 - `architect.md`
@@ -88,7 +103,7 @@ Para cada agente, leia de `~/.claude/sdc-templates/agents/` e sobrescreva em `.c
 
 ---
 
-## Passo 5 — Regenerar agentes de stack
+## Passo 6 — Regenerar agentes de stack
 
 Use o `pattern` do config migrado (Passo 3).
 
@@ -106,7 +121,7 @@ Use o `pattern` do config migrado (Passo 3).
 
 ---
 
-## Passo 6 — Atualizar commands do projeto
+## Passo 7 — Atualizar commands do projeto
 
 Para cada command, leia de `~/.claude/sdc-templates/commands/` e sobrescreva em `.claude/commands/`:
 - `orchestrate.md`
@@ -119,7 +134,7 @@ Para cada command, leia de `~/.claude/sdc-templates/commands/` e sobrescreva em 
 
 ---
 
-## Passo 7 — Verificar PR Workflow
+## Passo 8 — Verificar PR Workflow
 
 - Leia o `CLAUDE.md` do projeto
 - Se **não** contiver `## PR Workflow` e o config tiver `pr.enabled: false`, pergunte:

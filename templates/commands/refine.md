@@ -37,4 +37,24 @@ Revise o código modificado recentemente e corrija violações. Leia o `CLAUDE.m
 
 Para cada violação encontrada: corrija diretamente. Não crie helpers ou abstrações desnecessárias — resolva o problema mínimo.
 
-Ao final, liste o que foi corrigido e o que estava OK.
+Durante a revisão, **não apague arquivos**. Apenas anote quais deveriam ser removidos.
+
+## Gate de remoção de arquivos
+
+Ao final da revisão, se houver arquivos a remover, apresente a lista completa:
+
+> "Revisão concluída. Os seguintes arquivos devem ser removidos:
+>
+> - `src/modules/old-feature/old-feature.service.ts`
+> - `src/modules/old-feature/old-feature.controller.ts`
+> - `tests/old-feature.spec.ts`
+>
+> Confirma a remoção? Se quiser preservar algum arquivo, informe quais."
+
+Aguarde a resposta antes de executar qualquer `rm`.
+
+- Se o usuário confirmar: remova todos os arquivos listados
+- Se o usuário excluir algum: remova apenas os aprovados
+- Se o usuário recusar: não remova nada
+
+Se não houver arquivos a remover, pule este gate e liste apenas o que foi corrigido e o que estava OK.

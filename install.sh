@@ -46,6 +46,9 @@ for agent in architect tdd design docs backend frontend; do
   download "templates/agents/${agent}.md" "$TEMPLATES_DIR/agents/${agent}.md"
 done
 
+# Settings template
+download "templates/settings.json" "$TEMPLATES_DIR/settings.json"
+
 # Command templates
 for cmd in orchestrate clarify commit test refine pr bootstrap; do
   download "templates/commands/${cmd}.md" "$TEMPLATES_DIR/commands/${cmd}.md"

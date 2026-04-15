@@ -106,7 +106,20 @@ Exemplos por padrão:
 - **split** (NestJS + React): `{ "_version": "3", "pattern": "split", "backend": "NestJS", "frontend": "React+Vite", "database": "PostgreSQL", "orm": "Drizzle" }`
 - **api-only** (FastAPI): `{ "_version": "3", "pattern": "api-only", "backend": "FastAPI", "frontend": null, "database": "PostgreSQL", "orm": "SQLAlchemy" }`
 
-## Passo 4 — Copiar agentes genéricos
+## Passo 4 — Permissões pré-configuradas (opcional)
+
+Se `.claude/settings.json` já existir, pule este passo.
+
+Se não existir, pergunte:
+
+> "Deseja usar permissões pré-configuradas? Isso permite que o Claude leia, edite e crie arquivos e rode comandos comuns de desenvolvimento (git, npm, pip, etc.) sem pedir confirmação a cada vez. Operações destrutivas como `sudo` e `rm -rf /` continuam bloqueadas.
+>
+> (sim/não)"
+
+- Se sim: leia `~/.claude/sdc-templates/settings.json` e escreva em `.claude/settings.json`
+- Se não: pule sem criar o arquivo
+
+## Passo 5 — Copiar agentes genéricos
 
 Leia cada arquivo em `~/.claude/sdc-templates/agents/` e escreva em `.claude/agents/`:
 - `architect.md` → `.claude/agents/architect.md`
@@ -114,7 +127,7 @@ Leia cada arquivo em `~/.claude/sdc-templates/agents/` e escreva em `.claude/age
 - `design.md` → `.claude/agents/design.md`
 - `docs.md` → `.claude/agents/docs.md`
 
-## Passo 5 — Gerar agentes de stack
+## Passo 6 — Gerar agentes de stack
 
 Gere os agentes conforme o padrão arquitetural registrado no `sdc.config.json`:
 
@@ -156,7 +169,7 @@ Leia `~/.claude/sdc-templates/agents/frontend.md` como referência de estrutura.
 - Cobrir boas práticas de paginação, autenticação e tipagem
 - Incluir regras absolutas
 
-## Passo 6 — Copiar commands
+## Passo 7 — Copiar commands
 
 Leia cada arquivo em `~/.claude/sdc-templates/commands/` e escreva em `.claude/commands/`:
 - `orchestrate.md`
@@ -167,11 +180,11 @@ Leia cada arquivo em `~/.claude/sdc-templates/commands/` e escreva em `.claude/c
 - `pr.md`
 - `bootstrap.md`
 
-## Passo 7 — Copiar spec template
+## Passo 8 — Copiar spec template
 
 Leia `~/.claude/sdc-templates/specs/_template.md` e escreva em `docs/specs/_template.md`.
 
-## Passo 8 — Gerar CLAUDE.md
+## Passo 9 — Gerar CLAUDE.md
 
 **Se já existir um `CLAUDE.md` na raiz:** não sobrescreva. Informe o usuário que deve adaptá-lo manualmente.
 
@@ -283,7 +296,7 @@ Use `isolation: "worktree"` sempre que dois agentes puderem modificar arquivos a
 Não use quando apenas um agente roda por vez — o worktree tem custo de setup desnecessário.
 ```
 
-## Passo 9 — Confirmar
+## Passo 10 — Confirmar
 
 Liste todos os arquivos criados. Exiba:
 

@@ -1,0 +1,87 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "MultiEdit(*)",
+      "Glob(*)",
+
+      "Bash(git *)",
+
+      "Bash(node *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(yarn *)",
+      "Bash(pnpm *)",
+      "Bash(bun *)",
+      "Bash(bunx *)",
+
+      "Bash(python *)",
+      "Bash(python3 *)",
+      "Bash(pip *)",
+      "Bash(pip3 *)",
+      "Bash(uv *)",
+      "Bash(poetry *)",
+      "Bash(pipenv *)",
+
+      "Bash(ruby *)",
+      "Bash(gem *)",
+      "Bash(bundle *)",
+      "Bash(rails *)",
+      "Bash(rake *)",
+
+      "Bash(go *)",
+      "Bash(cargo *)",
+      "Bash(rustc *)",
+
+      "Bash(dotnet *)",
+
+      "Bash(php *)",
+      "Bash(composer *)",
+
+      "Bash(java *)",
+      "Bash(javac *)",
+      "Bash(mvn *)",
+      "Bash(gradle *)",
+
+      "Bash(prisma *)",
+      "Bash(drizzle-kit *)",
+
+      "Bash(mkdir *)",
+      "Bash(touch *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(rm *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(echo *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(sed *)",
+      "Bash(awk *)",
+      "Bash(sort *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(curl *)",
+      "Bash(chmod *)",
+      "Bash(bash *)",
+      "Bash(sh *)",
+      "Bash(export *)",
+      "Bash(source *)",
+      "Bash(env *)",
+      "Bash(which *)",
+      "Bash(type *)"
+    ],
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~*)",
+      "Bash(chmod -R * /*)",
+      "Bash(chown *)",
+      "Bash(mkfs*)",
+      "Bash(dd if=*)"
+    ]
+  }
+}

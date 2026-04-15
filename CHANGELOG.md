@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [3.2.0] — 2026-04-15
+
+### Adicionado
+- `settings.json` gerado automaticamente pelo `sdc.init` com `permissions.allow` pré-configuradas para operações comuns de desenvolvimento (file tools, git, package managers de todas as stacks, utilitários de shell) e `permissions.deny` para operações destrutivas (`sudo`, `rm -rf /`, `chown`, etc.). Elimina prompts repetitivos sem precisar de `--dangerously-skip-permissions`.
+- Gate de remoção de arquivos no `/refine`: durante a revisão, arquivos identificados para remoção são coletados mas não apagados. Ao final, Claude apresenta a lista completa e aguarda uma única confirmação — o usuário pode excluir itens específicos antes de aprovar.
+
 ## [3.1.0] — 2026-04-15
 
 ### Adicionado

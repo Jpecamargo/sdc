@@ -48,6 +48,7 @@ templates/
     test.md        # Compilação + lint + testes
     refine.md      # Code review e correção de violações
     pr.md          # Abre pull request
+    bootstrap.md   # Scaffolding, dependências e primeiro commit (repos vazios)
   specs/
     _template.md   # Template de spec com todas as seções obrigatórias
 ```

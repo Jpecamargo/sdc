@@ -115,6 +115,7 @@ Para cada command, leia de `~/.claude/sdc-templates/commands/` e sobrescreva em 
 - `test.md`
 - `refine.md`
 - `pr.md`
+- `bootstrap.md`
 
 ---
 

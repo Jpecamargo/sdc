@@ -47,7 +47,7 @@ for agent in architect tdd design docs backend frontend; do
 done
 
 # Command templates
-for cmd in orchestrate clarify commit test refine pr; do
+for cmd in orchestrate clarify commit test refine pr bootstrap; do
   download "templates/commands/${cmd}.md" "$TEMPLATES_DIR/commands/${cmd}.md"
 done
 

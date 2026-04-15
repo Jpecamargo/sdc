@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Adicionado
+- Comando `/bootstrap`: cria a estrutura completa do projeto (scaffolding via CLI nativo de cada framework), instala dependências adicionais (ORM, drivers), configura `.env.example`, verifica `.gitignore` e faz o primeiro commit. Disponível após `/sdc.init` em projetos vazios.
+
 ## [3.0.0] — 2026-04-15
 
 ### Adicionado

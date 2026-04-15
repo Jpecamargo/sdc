@@ -165,6 +165,7 @@ Leia cada arquivo em `~/.claude/sdc-templates/commands/` e escreva em `.claude/c
 - `test.md`
 - `refine.md`
 - `pr.md`
+- `bootstrap.md`
 
 ## Passo 7 — Copiar spec template
 

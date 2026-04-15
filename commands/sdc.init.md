@@ -171,14 +171,7 @@ Leia `~/.claude/sdc-templates/agents/frontend.md` como referência de estrutura.
 
 ## Passo 7 — Copiar commands
 
-Leia cada arquivo em `~/.claude/sdc-templates/commands/` e escreva em `.claude/commands/`:
-- `orchestrate.md`
-- `clarify.md`
-- `commit.md`
-- `test.md`
-- `refine.md`
-- `pr.md`
-- `bootstrap.md`
+Liste todos os arquivos em `~/.claude/sdc-templates/commands/` e escreva cada um em `.claude/commands/`.
 
 ## Passo 8 — Copiar spec template
 

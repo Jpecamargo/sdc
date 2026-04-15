@@ -123,14 +123,9 @@ Use o `pattern` do config migrado (Passo 3).
 
 ## Passo 7 — Atualizar commands do projeto
 
-Para cada command, leia de `~/.claude/sdc-templates/commands/` e sobrescreva em `.claude/commands/`:
-- `orchestrate.md`
-- `clarify.md`
-- `commit.md`
-- `test.md`
-- `refine.md`
-- `pr.md`
-- `bootstrap.md`
+Liste todos os arquivos em `~/.claude/sdc-templates/commands/` e sobrescreva cada um em `.claude/commands/`.
+
+Não use uma lista fixa — copie tudo que estiver no diretório de templates. Isso garante que novos commands adicionados ao plugin sejam incluídos automaticamente.
 
 ---
 

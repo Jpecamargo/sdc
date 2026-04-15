@@ -46,13 +46,11 @@ When you ask an AI to implement a feature from a vague description, it generates
 
 With SDD, the spec defines the full contract upfront:
 
-- **API contract** — endpoints, status codes, request/response shapes
+- **API contract** — endpoints, status codes, request/response shapes (or Server Actions for serverless projects)
 - **Types** — TypeScript interfaces (or equivalent) for the frontend
-- **DTOs/Schemas** — input validation for the backend
+- **DTOs/Schemas** — input validation and ORM schemas
 - **Acceptance criteria** — verifiable behaviors that define "done"
 - **Business rules** — logic that isn't obvious from the contract alone
-
-Backend and frontend read the same spec independently and arrive at the same result. No misalignment, no rewrite.
 
 ### When not to use SDD
 
@@ -64,17 +62,15 @@ For bugs, small visual adjustments, and minor refactors — go directly to imple
 
 **S**pec **D**riven **C**laude.
 
-SDC is built specifically for Claude Code. It's not a generic AI workflow tool — it uses Claude Code's native agent system (`.claude/agents/`) and slash commands (`.claude/commands/`) to enforce the SDD process. The Claude dependency is a feature, not a limitation.
+SDC is built specifically for Claude Code. It uses Claude Code's native agent system (`.claude/agents/`) and slash commands (`.claude/commands/`) to enforce the SDD process. The Claude dependency is a feature, not a limitation.
 
 ---
 
 ## How it works
 
-SDC installs four global slash commands into Claude Code. After running `/sdc.init` in any project, you get a full set of specialized agents and skills configured for your stack.
+SDC installs four global slash commands into Claude Code. After running `/sdc.init` in any project, you get a full set of specialized agents and skills tailored to your stack and architectural pattern.
 
 ### The workflow
-
-`/clarify` is the single entry point for new features. It orchestrates the full pipeline automatically — the only moments it stops are the two gates that require your input.
 
 ```
 /clarify → architect → [gate: spec approval] → tdd → backend ∥ frontend → refine → test → [gate: manual validation] → docs → commit → /pr
@@ -83,46 +79,80 @@ SDC installs four global slash commands into Claude Code. After running `/sdc.in
 | Step | Who | What happens |
 |------|-----|-------------|
 | `/clarify` | You + Claude | Describe the feature. Claude asks targeted questions, evaluates scope, and produces a consolidated brief. |
-| `architect` | Agent (opus) | Checks for reusable code (DRY) and applicable design patterns before writing the full spec in `docs/specs/`. |
+| `architect` | Agent (opus) | Checks for reusable code and applicable design patterns before writing the full spec in `docs/specs/`. Adapts spec format to the project's architectural pattern. |
 | **[gate]** | **You** | **Review and approve the spec. Request changes or cancel if needed.** |
 | `tdd` | Agent (sonnet) | Writes tests from the acceptance criteria — before the implementation exists. |
-| `backend` + `frontend` | Agents (sonnet) | Implement in parallel using the approved spec as the contract. |
-| refine | Inline | Code review: architecture, DRY, security, naming, error handling. Violations are fixed immediately. |
-| test | Inline | Compile + lint + run tests. Failures are fixed before moving on. |
+| `backend` + `frontend` | Agents (sonnet) | Implement in parallel (split projects) or sequentially (serverless/api-only) using the approved spec as the contract. |
+| `refine` | Inline | Code review: architecture, DRY, security, naming, error handling. Violations are fixed immediately. |
+| `test` | Inline | Compile + lint + run tests. Failures are fixed before moving on. |
 | **[gate]** | **You** | **Test the feature manually. Request adjustments if needed. Confirm when ready.** |
 | `docs` | Agent (haiku) | Updates `CLAUDE.md` to reflect structural changes. |
-| commit | Inline | Semantic commit. |
-| `/pr` | Inline (haiku) | Opens a pull request to the configured base branch. Skipped if PR workflow is not enabled. |
+| `commit` | Inline | Semantic commit. |
+| `/pr` | Inline | Opens a pull request to the configured base branch. Skipped if PR workflow is not enabled. |
 
 ### For bugs and adjustments
 
-Use `/orchestrate` for anything that isn't a new feature.
+Use `/orchestrate` for anything that isn't a new feature. It reads which agents exist in the project before routing — so serverless projects with no `backend.md` correctly route server-side bugs to `frontend`.
 
 | Situation | Flow |
 |-----------|------|
 | Backend bug | backend → test → commit |
 | Frontend / UI bug | frontend → test → commit |
+| Server-side bug (serverless) | frontend → test → commit |
 | Visual change | design → frontend → test → commit |
 | Refactor | refine → test → commit |
 | Outdated docs | docs → commit |
 
-If PR workflow is active, `/pr` is added after commit in all flows.
+---
 
-### PR Workflow (optional)
+## Architectural patterns
 
-When enabled during `/sdc.init` or `/sdc.upgrade`, every feature starts on a dedicated branch and ends with a pull request.
+`/sdc.init` detects or asks about your project's architectural pattern and generates the right agents accordingly:
 
-**Setup:** during init, answer yes to "PR workflow?" and provide a base branch (e.g. `main`). This adds a `## PR Workflow` section to `CLAUDE.md`.
+| Pattern | Description | Agents generated |
+|---------|-------------|-----------------|
+| `serverless` | One framework handles both UI and server logic (e.g. Next.js with Server Actions, SvelteKit, Nuxt) | `frontend.md` only — covers UI, Server Actions, and ORM |
+| `split` | Separate backend and frontend processes (e.g. NestJS + React, FastAPI + Vue) | `backend.md` + `frontend.md` |
+| `api-only` | Backend only, no UI (e.g. FastAPI, NestJS, Rails API) | `backend.md` only |
 
-**Branch creation:** `/clarify` and `/orchestrate` detect if you're on the base branch and prompt for a feature branch name before starting any work.
+Agents are generated dynamically by Claude for any technology — no predefined stack list.
 
-**Base branch override:** pass it as an argument when needed:
+---
+
+## What `/sdc.init` creates
 
 ```
-/pr develop
+.claude/
+├── sdc.config.json     # stack choices and architectural pattern (versioned)
+├── agents/
+│   ├── architect.md    # opus   — spec writing, adapted to the project's pattern
+│   ├── tdd.md          # sonnet — tests from acceptance criteria
+│   ├── backend.md      # sonnet — your backend stack (split / api-only only)
+│   ├── frontend.md     # sonnet — your frontend stack (split / serverless only)
+│   ├── design.md       # sonnet — design system specs
+│   └── docs.md         # haiku  — keeps CLAUDE.md in sync
+└── commands/
+    ├── clarify.md      # full feature pipeline (entry point for new features)
+    ├── orchestrate.md  # routes bugs, adjustments and refactors
+    ├── commit.md       # semantic commits
+    ├── test.md         # compile + lint + test
+    ├── refine.md       # code review and violation fixes
+    └── pr.md           # open pull request (PR workflow only)
+
+docs/specs/
+└── _template.md        # spec template with all required sections
 ```
 
-**With git worktree:** the PR is opened before merging the worktree back to root. After merge, remove the worktree with `git worktree remove <path>`.
+---
+
+## Plugin commands
+
+| Command | Purpose |
+|---------|---------|
+| `/sdc.init` | Initialize a project: detects stack and pattern, generates agents, creates `sdc.config.json` and `CLAUDE.md` |
+| `/sdc.clarify` | Clarify a feature, evaluate scope, propose splits if needed |
+| `/sdc.upgrade` | Update the global plugin and, if in an initialized project, regenerate agents and commands to the latest standard. Migrates `sdc.config.json` from any previous version automatically. |
+| `/sdc.help` | Full workflow reference and SDD introduction |
 
 ---
 
@@ -139,64 +169,28 @@ Session A:  /clarify → architect → [approval] → tdd → backend ∥ fronte
                           /clarify → architect → [approval] → tdd → ...
 ```
 
-- **One spec at a time** — don't start speccing a new feature until the current one is approved
-- **Parallel implementations** — once tdd begins, open a new session for the next spec
-- **No file conflicts** — each implementation session is isolated via worktree
-
 ---
 
-## Installation
+## PR Workflow (optional)
 
-See the [quick install](#installation) at the top.
+When enabled during `/sdc.init` or `/sdc.upgrade`, every feature starts on a dedicated branch and ends with a pull request.
 
----
+**Setup:** during init, answer yes to "PR workflow?" and provide a base branch (e.g. `main`).
 
-## Plugin commands
+**Base branch override:** pass it as an argument when needed: `/pr develop`
 
-| Command | Purpose |
-|---------|---------|
-| `/sdc.init` | Initialize a project: detects stack, creates `.claude/` structure and `CLAUDE.md` |
-| `/sdc.clarify` | Clarify a feature, evaluate scope, propose splits if needed |
-| `/sdc.upgrade` | Update agents/commands to latest templates without touching specs |
-| `/sdc.help` | Full workflow reference and SDD introduction |
-
-## What `/sdc.init` creates
-
-```
-.claude/
-├── agents/
-│   ├── architect.md    # opus   — DRY check, design patterns, spec writing
-│   ├── tdd.md          # sonnet — tests from acceptance criteria
-│   ├── backend.md      # sonnet — your backend stack
-│   ├── frontend.md     # sonnet — your frontend stack (if applicable)
-│   ├── design.md       # sonnet — design system specs
-│   └── docs.md         # haiku  — keeps CLAUDE.md in sync
-└── commands/
-    ├── clarify.md      # full feature pipeline (entry point for new features)
-    ├── orchestrate.md  # routes bugs, adjustments and refactors
-    ├── commit.md       # haiku  — semantic commits
-    ├── test.md         # compile + lint + test
-    ├── refine.md       # code review and violation fixes
-    └── pr.md           # haiku  — open pull request (PR workflow only)
-
-docs/specs/
-└── _template.md        # spec template with all required sections
-```
-
----
-
-## Supported stacks
-
-**Backend**: NestJS · Express · FastAPI · Django · Rails
-
-**Frontend**: Next.js · React+Vite · Angular · Vue
+**With git worktree:** open the PR before merging the worktree back to root, then remove it with `git worktree remove <path>`.
 
 ---
 
 ## Contributing
 
-Templates are plain markdown files. To add a new stack:
+Templates are plain markdown files in `templates/`. To contribute:
 
-1. Create `templates/agents/backend-<stack>.md` or `templates/agents/frontend-<stack>.md`
-2. Add the stack name to the detection logic in `commands/sdc.init.md`
-3. Submit a PR
+- **New agent behavior**: edit `templates/agents/<agent>.md`
+- **New command logic**: edit `templates/commands/<command>.md`
+- **Spec template**: edit `templates/specs/_template.md`
+
+Adding support for a new technology requires no code changes — agents are generated dynamically by Claude based on the user's stack choices.
+
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.

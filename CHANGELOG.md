@@ -2,8 +2,10 @@
 
 ## [Unreleased]
 
+## [3.1.0] — 2026-04-15
+
 ### Adicionado
-- Comando `/bootstrap`: cria a estrutura completa do projeto (scaffolding via CLI nativo de cada framework), instala dependências adicionais (ORM, drivers), configura `.env.example`, verifica `.gitignore` e faz o primeiro commit. Disponível após `/sdc.init` em projetos vazios.
+- Comando `/bootstrap`: scaffolding via CLI nativo do framework escolhido (Next.js, NestJS, FastAPI, Django, Rails, ASP.NET Core, Laravel, React+Vite, Angular, Vue, SvelteKit, Nuxt, Remix), instalação de dependências adicionais (ORM, drivers), criação de `.env.example`, validação do `.gitignore` e primeiro commit semântico. Disponível em todos os projetos inicializados; seguro para rodar apenas em repos ainda sem código.
 
 ## [3.0.0] — 2026-04-15
 

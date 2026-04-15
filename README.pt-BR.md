@@ -14,7 +14,7 @@ Um plugin para Claude Code que traz o Spec-Driven Development para qualquer proj
 bash <(curl -fsSL https://raw.githubusercontent.com/Jpecamargo/sdc/main/install.sh)
 ```
 
-Em seguida, abra o Claude Code em qualquer projeto e rode `/sdc.init`.
+Em seguida, abra o Claude Code em qualquer projeto e rode `/sdc.init`. Para projetos iniciados do zero, siga com `/bootstrap`.
 
 <details>
 <summary>Instalar pelo código-fonte</summary>
@@ -132,6 +132,7 @@ Os agentes são gerados dinamicamente pelo Claude para qualquer tecnologia — s
 │   ├── design.md       # sonnet — especificações do design system
 │   └── docs.md         # haiku  — mantém o CLAUDE.md sincronizado
 └── commands/
+    ├── bootstrap.md    # scaffolding, dependências e primeiro commit (repos vazios)
     ├── clarify.md      # pipeline completo de features (entry point)
     ├── orchestrate.md  # roteia bugs, ajustes e refatorações
     ├── commit.md       # commits semânticos
@@ -153,6 +154,20 @@ docs/specs/
 | `/sdc.clarify` | Clarifica uma feature, avalia o escopo, propõe divisões se necessário |
 | `/sdc.upgrade` | Atualiza o plugin global e, se estiver em um projeto inicializado, regenera agentes e commands para o padrão mais recente. Migra o `sdc.config.json` de qualquer versão anterior automaticamente. |
 | `/sdc.help` | Referência completa do fluxo e introdução ao SDD |
+
+## Comandos de projeto
+
+Copiados para `.claude/commands/` pelo `/sdc.init` e disponíveis em todo projeto inicializado:
+
+| Comando | Função |
+|---------|--------|
+| `/bootstrap` | Faz o scaffolding usando o CLI nativo do framework, instala dependências adicionais (ORM, drivers), configura `.env.example`, valida o `.gitignore` e cria o primeiro commit. Use uma vez, em repos vazios, logo após o `/sdc.init`. |
+| `/clarify` | Entry point para features novas — executa o pipeline spec-driven completo |
+| `/orchestrate` | Roteia bugs, ajustes e refatorações para o agente correto |
+| `/refine` | Code review e correção de violações |
+| `/test` | Compilação + lint + testes |
+| `/commit` | Commit semântico |
+| `/pr` | Abre pull request (PR workflow) |
 
 ---
 

@@ -14,7 +14,7 @@ A Claude Code plugin that brings Spec-Driven Development to any project through 
 bash <(curl -fsSL https://raw.githubusercontent.com/Jpecamargo/sdc/main/install.sh)
 ```
 
-Then open Claude Code in any project and run `/sdc.init`.
+Then open Claude Code in any project and run `/sdc.init`. For new projects started from scratch, follow with `/bootstrap`.
 
 <details>
 <summary>Install from source</summary>
@@ -132,6 +132,7 @@ Agents are generated dynamically by Claude for any technology — no predefined 
 │   ├── design.md       # sonnet — design system specs
 │   └── docs.md         # haiku  — keeps CLAUDE.md in sync
 └── commands/
+    ├── bootstrap.md    # scaffold project, install deps, first commit (empty repos)
     ├── clarify.md      # full feature pipeline (entry point for new features)
     ├── orchestrate.md  # routes bugs, adjustments and refactors
     ├── commit.md       # semantic commits
@@ -153,6 +154,20 @@ docs/specs/
 | `/sdc.clarify` | Clarify a feature, evaluate scope, propose splits if needed |
 | `/sdc.upgrade` | Update the global plugin and, if in an initialized project, regenerate agents and commands to the latest standard. Migrates `sdc.config.json` from any previous version automatically. |
 | `/sdc.help` | Full workflow reference and SDD introduction |
+
+## Project commands
+
+These are copied into `.claude/commands/` by `/sdc.init` and available inside every initialized project:
+
+| Command | Purpose |
+|---------|---------|
+| `/bootstrap` | Scaffold the project using the framework's native CLI, install additional dependencies (ORM, drivers), configure `.env.example`, validate `.gitignore`, and create the first commit. Use once, in empty repos, right after `/sdc.init`. |
+| `/clarify` | Entry point for new features — runs the full spec-driven pipeline |
+| `/orchestrate` | Routes bugs, adjustments, and refactors to the right agent |
+| `/refine` | Code review and violation fixes |
+| `/test` | Compile + lint + run tests |
+| `/commit` | Semantic commit |
+| `/pr` | Open a pull request (PR workflow only) |
 
 ---
 

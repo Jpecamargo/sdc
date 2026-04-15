@@ -29,7 +29,29 @@ Verifique se `.claude/sdc.config.json` existe no diretório atual.
 
 **Se não existir:** informe que o plugin foi atualizado e que `/sdc.init` deve ser rodado para inicializar o projeto. Encerre aqui.
 
-**Se existir:** prossiga com os passos abaixo.
+**Se existir:** verifique se o config está no formato atual (tem o campo `pattern`).
+
+**Se não tiver `pattern`** (config no formato antigo com `backend.framework` e `frontend.framework`), migre antes de prosseguir:
+
+1. Infira o `pattern` a partir dos campos existentes:
+   - `backend.framework` é null e `frontend.framework` não é null → `serverless`
+   - Ambos não são null → `split`
+   - `frontend.framework` é null e `backend.framework` não é null → `api-only`
+2. Reescreva `.claude/sdc.config.json` no novo formato:
+   ```json
+   {
+     "pattern": "<inferido>",
+     "backend": "<backend.framework do config antigo>",
+     "frontend": "<frontend.framework do config antigo>",
+     "database": "<backend.database do config antigo>",
+     "orm": "<backend.orm do config antigo>",
+     "worktree": <valor existente>,
+     "pr": <valor existente>
+   }
+   ```
+3. Informe o usuário que o config foi migrado para o novo formato e exiba o resultado. Pergunte se o `pattern` inferido está correto antes de continuar.
+
+**Se já tiver `pattern`:** prossiga diretamente.
 
 ### 2a. Agentes genéricos
 

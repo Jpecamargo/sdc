@@ -29,29 +29,34 @@ Verifique se `.claude/sdc.config.json` existe no diretório atual.
 
 **Se não existir:** informe que o plugin foi atualizado e que `/sdc.init` deve ser rodado para inicializar o projeto. Encerre aqui.
 
-**Se existir:** verifique se o config está no formato atual (tem o campo `pattern`).
+**Se existir:** leia o campo `_version` para determinar o formato atual e aplicar as migrações necessárias em cadeia até a versão mais recente (`"3"`).
 
-**Se não tiver `pattern`** (config no formato antigo com `backend.framework` e `frontend.framework`), migre antes de prosseguir:
+### Migração v1 → v2 (sem `_version`, com `backend.framework` aninhado)
 
-1. Infira o `pattern` a partir dos campos existentes:
-   - `backend.framework` é null e `frontend.framework` não é null → `serverless`
-   - Ambos não são null → `split`
-   - `frontend.framework` é null e `backend.framework` não é null → `api-only`
-2. Reescreva `.claude/sdc.config.json` no novo formato:
-   ```json
-   {
-     "pattern": "<inferido>",
-     "backend": "<backend.framework do config antigo>",
-     "frontend": "<frontend.framework do config antigo>",
-     "database": "<backend.database do config antigo>",
-     "orm": "<backend.orm do config antigo>",
-     "worktree": <valor existente>,
-     "pr": <valor existente>
-   }
-   ```
-3. Informe o usuário que o config foi migrado para o novo formato e exiba o resultado. Pergunte se o `pattern` inferido está correto antes de continuar.
+Identificação: config não tem `_version` E tem `backend` como objeto com `framework` dentro.
 
-**Se já tiver `pattern`:** prossiga diretamente.
+```json
+// formato v1
+{ "backend": { "framework": "NestJS", "database": "PostgreSQL", "orm": "Drizzle" }, "frontend": { "framework": "Next.js" } }
+```
+
+Transformação:
+1. Infira o `pattern`:
+   - `backend.framework` null + `frontend.framework` presente → `serverless`
+   - Ambos presentes → `split`
+   - `backend.framework` presente + `frontend.framework` null → `api-only`
+2. Achate a estrutura: `backend.framework` → `backend`, `frontend.framework` → `frontend`, `backend.database` → `database`, `backend.orm` → `orm`
+3. Escreva o config com `_version: "2"` e `pattern` adicionados
+
+### Migração v2 → v3 (tem `pattern` mas sem `_version`)
+
+Identificação: config tem `pattern` mas não tem `_version`.
+
+Transformação: adicione `"_version": "3"` ao config. Nenhuma outra mudança estrutural.
+
+---
+
+Após aplicar todas as migrações necessárias, informe o usuário quais versões foram percorridas e exiba o config final. Se o `pattern` foi inferido (migração v1→v2), pergunte se está correto antes de continuar.
 
 ### 2a. Agentes genéricos
 

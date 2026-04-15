@@ -87,6 +87,7 @@ Crie `.claude/sdc.config.json` com as escolhas coletadas:
 
 ```json
 {
+  "_version": "3",
   "pattern": "<serverless | split | api-only>",
   "backend": "<framework de backend ou null>",
   "frontend": "<framework de frontend ou null>",
@@ -101,9 +102,9 @@ Crie `.claude/sdc.config.json` com as escolhas coletadas:
 ```
 
 Exemplos por padrão:
-- **serverless** (Next.js): `{ "pattern": "serverless", "backend": null, "frontend": "Next.js", "database": "PostgreSQL", "orm": "Prisma" }`
-- **split** (NestJS + React): `{ "pattern": "split", "backend": "NestJS", "frontend": "React+Vite", "database": "PostgreSQL", "orm": "Drizzle" }`
-- **api-only** (FastAPI): `{ "pattern": "api-only", "backend": "FastAPI", "frontend": null, "database": "PostgreSQL", "orm": "SQLAlchemy" }`
+- **serverless** (Next.js): `{ "_version": "3", "pattern": "serverless", "backend": null, "frontend": "Next.js", "database": "PostgreSQL", "orm": "Prisma" }`
+- **split** (NestJS + React): `{ "_version": "3", "pattern": "split", "backend": "NestJS", "frontend": "React+Vite", "database": "PostgreSQL", "orm": "Drizzle" }`
+- **api-only** (FastAPI): `{ "_version": "3", "pattern": "api-only", "backend": "FastAPI", "frontend": null, "database": "PostgreSQL", "orm": "SQLAlchemy" }`
 
 ## Passo 4 — Copiar agentes genéricos
 

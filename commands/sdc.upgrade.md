@@ -72,9 +72,9 @@ Adicione `"_version": "3"` e salve. Informe o usuário.
 
 ### Config v3 (tem `_version: "3"`)
 
-Nenhuma migração necessária. Continue.
+Nenhuma migração necessária. **Execute os Passos 4, 5, 6, 7 e 8 normalmente.**
 
-**Após concluir este passo**, leia o `pattern` do config já migrado e use-o nos passos seguintes.
+Leia o `pattern` do config e use-o nos passos seguintes.
 
 ---
 

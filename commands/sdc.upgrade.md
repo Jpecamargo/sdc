@@ -1,47 +1,74 @@
 ---
-description: Atualiza agentes e commands do projeto com a versão mais recente dos templates instalados.
+description: Atualiza o plugin SDC global e, se estiver em um projeto inicializado, atualiza também os agentes e commands do projeto.
 ---
 
-Atualize os agentes e commands deste projeto.
+Execute os passos abaixo na ordem. O Passo 1 sempre roda. O Passo 2 só roda se o projeto estiver inicializado.
 
 ## Regras — nunca viole
 
 - **Nunca toque** em `docs/specs/` — esses arquivos pertencem ao usuário
 - **Nunca sobrescreva** `CLAUDE.md` — tem contexto específico do projeto
-- Atualize apenas `.claude/agents/` e `.claude/commands/`
+- No Passo 2, atualize apenas `.claude/agents/` e `.claude/commands/`
 - Arquivos em `.claude/` que não existem nos templates: **não toque**
 
-## Passos
+---
 
-1. Leia `.claude/sdc.config.json`. Se não existir, informe o usuário e pare — o upgrade requer o config gerado pelo `/sdc.init`.
+## Passo 1 — Atualizar o plugin global (sempre)
 
-2. Para agentes genéricos (`architect.md`, `tdd.md`, `design.md`, `docs.md`):
-   - Leia a versão em `~/.claude/sdc-templates/agents/`
-   - Sobrescreva o arquivo do projeto
+Execute o script de instalação para atualizar `~/.claude/commands/sdc.*.md` e `~/.claude/sdc-templates/` com a versão mais recente:
 
-3. Para `backend.md`:
-   - Leia `~/.claude/sdc-templates/agents/backend.md` como estrutura de referência para as seções esperadas
-   - Leia `backend.framework`, `backend.database` e `backend.orm` de `.claude/sdc.config.json`
-   - **Regenere o conteúdo completo** de `.claude/agents/backend.md` para a stack registrada, com o mesmo nível de especificidade de um template especializado
-   - Pule se `backend.framework` for null
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Jpecamargo/sdc/main/install.sh)
+```
 
-4. Para `frontend.md`:
-   - Leia `~/.claude/sdc-templates/agents/frontend.md` como estrutura de referência
-   - Leia `frontend.framework` de `.claude/sdc.config.json`
-   - **Regenere o conteúdo completo** de `.claude/agents/frontend.md` para o framework registrado
-   - Pule se `frontend.framework` for null
+---
 
-5. Para commands (`orchestrate.md`, `clarify.md`, `commit.md`, `test.md`, `refine.md`, `pr.md`):
-   - Leia a versão em `~/.claude/sdc-templates/commands/`
-   - Sobrescreva o arquivo do projeto
+## Passo 2 — Atualizar o projeto (somente se inicializado)
 
-6. Verificar configuração de PR Workflow:
-   - Leia o `CLAUDE.md` do projeto
-   - Se **não** contiver a seção `## PR Workflow` e `sdc.config.json` tiver `pr.enabled: false`: pergunte ao usuário em uma única mensagem:
-     > "Deseja ativar o PR workflow? (sim/não) — se sim, qual é a branch base? (ex: `main`)"
-   - Se sim: atualize `sdc.config.json` e adicione a seção ao CLAUDE.md
-   - Se o CLAUDE.md já contiver `## PR Workflow`: não toque
+Verifique se `.claude/sdc.config.json` existe no diretório atual.
 
-7. Ao final, liste:
-   - **Atualizados**: arquivos que foram sobrescritos ou regenerados
-   - **Preservados**: arquivos que não foram tocados
+**Se não existir:** informe que o plugin foi atualizado e que `/sdc.init` deve ser rodado para inicializar o projeto. Encerre aqui.
+
+**Se existir:** prossiga com os passos abaixo.
+
+### 2a. Agentes genéricos
+
+Para cada agente (`architect.md`, `tdd.md`, `design.md`, `docs.md`):
+- Leia a versão em `~/.claude/sdc-templates/agents/`
+- Sobrescreva `.claude/agents/<agente>.md`
+
+### 2b. Agente backend
+
+- Leia `~/.claude/sdc-templates/agents/backend.md` como estrutura de referência
+- Leia `backend.framework`, `backend.database` e `backend.orm` de `.claude/sdc.config.json`
+- Regenere o conteúdo completo de `.claude/agents/backend.md` para a stack registrada
+- Pule se `backend.framework` for null
+
+### 2c. Agente frontend
+
+- Leia `~/.claude/sdc-templates/agents/frontend.md` como estrutura de referência
+- Leia `frontend.framework` de `.claude/sdc.config.json`
+- Regenere o conteúdo completo de `.claude/agents/frontend.md` para o framework registrado
+- Pule se `frontend.framework` for null
+
+### 2d. Commands do projeto
+
+Para cada command (`orchestrate.md`, `clarify.md`, `commit.md`, `test.md`, `refine.md`, `pr.md`):
+- Leia a versão em `~/.claude/sdc-templates/commands/`
+- Sobrescreva `.claude/commands/<command>.md`
+
+### 2e. PR Workflow
+
+- Leia o `CLAUDE.md` do projeto
+- Se **não** contiver `## PR Workflow` e `sdc.config.json` tiver `pr.enabled: false`, pergunte:
+  > "Deseja ativar o PR workflow? (sim/não) — se sim, qual é a branch base? (ex: `main`)"
+- Se sim: atualize `sdc.config.json` e adicione a seção ao CLAUDE.md
+- Se o CLAUDE.md já contiver `## PR Workflow`: não toque
+
+---
+
+## Resultado
+
+Ao final, liste:
+- **Plugin global**: atualizado
+- **Projeto**: atualizado (com a lista de arquivos) ou "não inicializado — rode `/sdc.init` para começar"

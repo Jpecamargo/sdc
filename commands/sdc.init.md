@@ -15,30 +15,33 @@ Verifique a presença de arquivos de configuração conhecidos na raiz e nos dir
 
 Leia todos os arquivos de configuração encontrados e, se necessário, arquivos de código relevantes (ex: imports, configuração de banco, arquivos de migração, `.env.example`) para inferir:
 
-- **Backend**: framework principal e linguagem (ex: NestJS/TypeScript, FastAPI/Python, ASP.NET Core/C#)
-- **Frontend**: framework de UI, se houver (ex: Next.js, Vue, Angular)
-- **Banco de dados**: tipo e driver (ex: PostgreSQL via pg, MongoDB via mongoose)
-- **ORM/ODM**: biblioteca de acesso a dados (ex: Drizzle, Prisma, SQLAlchemy, ActiveRecord)
+- **Padrão arquitetural**:
+  - `serverless` — um único framework lida com UI e lógica de servidor (ex: Next.js com Server Actions, SvelteKit, Nuxt, Remix)
+  - `split` — backend e frontend são processos/apps separados (ex: NestJS + React, FastAPI + Vue)
+  - `api-only` — apenas backend, sem frontend (ex: FastAPI, NestJS, Rails API)
+- **Framework(s)**: principal(is) tecnologia(s) e linguagem
+- **Banco de dados**: tipo e driver
+- **ORM/ODM**: biblioteca de acesso a dados
 
-Após a análise, apresente em **uma única mensagem** o que foi detectado com confiança e pergunte se está correto. Omita da mensagem os itens não detectados — esses serão perguntados em seguida. Exemplo:
+Após a análise, apresente em **uma única mensagem** o que foi detectado com confiança e pergunte se está correto. Omita os itens não detectados — esses serão perguntados em seguida. Exemplo:
 
 > "Detectei o seguinte no projeto:
-> - Backend: NestJS (TypeScript)
-> - Frontend: Next.js
+> - Padrão: serverless (Next.js com Server Actions)
+> - Framework: Next.js 14+ (TypeScript)
 > - Banco: PostgreSQL
-> - ORM: Drizzle
+> - ORM: Prisma
 >
 > Está correto? Alguma correção?"
 
 Aguarde a confirmação. Se o usuário corrigir algum item, use o valor corrigido.
 
-Em seguida, para cada item que **não foi possível detectar com confiança**, pergunte separadamente, um por vez, antes de prosseguir. Exemplo:
+Para cada item **não detectado com confiança**, pergunte separadamente, um por vez:
+
+> "Não consegui identificar o padrão arquitetural. É serverless (ex: Next.js com Server Actions), backend + frontend separados, ou API pura sem frontend?"
 
 > "Não consegui identificar o banco de dados. Qual você está usando?"
 
-> "Não consegui identificar o ORM. Tem alguma preferência, ou prefere SQL direto?"
-
-Após confirmar ou coletar todos os itens, faça as duas perguntas de workflow, **uma de cada vez**:
+Após confirmar todos os itens, faça as duas perguntas de workflow, **uma de cada vez**:
 
 > "O projeto usará worktrees para desenvolvimento paralelo de features? (sim/não)"
 
@@ -48,11 +51,16 @@ Após confirmar ou coletar todos os itens, faça as duas perguntas de workflow, 
 
 **Se o repositório estiver vazio** (nenhum arquivo de configuração encontrado), faça cada pergunta separadamente, aguardando a resposta antes de prosseguir:
 
-**Pergunta 1 — Backend**:
-> "Qual tecnologia/framework você quer usar no backend? (ex: NestJS, FastAPI, Django, Express, Rails, ASP.NET Core, Spring Boot, Laravel — ou 'nenhum' se for só frontend)"
+**Pergunta 1 — Padrão arquitetural**:
+> "Qual é o padrão do projeto?
+> 1. Serverless — um framework lida com UI e servidor (ex: Next.js com Server Actions, SvelteKit, Nuxt)
+> 2. Backend + Frontend separados (ex: NestJS + React, FastAPI + Vue)
+> 3. API pura — só backend, sem frontend"
 
-**Pergunta 2 — Frontend**:
-> "Qual tecnologia/framework você quer usar no frontend? (ex: Next.js, React+Vite, Angular, Vue, Svelte — ou 'nenhum' se for só API)"
+**Pergunta 2 — Framework(s)**:
+- Se serverless: "Qual framework? (ex: Next.js, SvelteKit, Nuxt, Remix)"
+- Se split: "Qual framework de backend? (ex: NestJS, FastAPI, Django, Express, Rails, ASP.NET Core)" e depois "Qual framework de frontend? (ex: React+Vite, Angular, Vue)"
+- Se api-only: "Qual framework? (ex: FastAPI, NestJS, Django, Express, Rails, ASP.NET Core, Spring Boot)"
 
 **Pergunta 3 — Banco de dados**:
 > "Qual banco de dados você vai usar? (ex: PostgreSQL, MySQL, MongoDB, SQLite, Redis)"
@@ -79,14 +87,11 @@ Crie `.claude/sdc.config.json` com as escolhas coletadas:
 
 ```json
 {
-  "backend": {
-    "framework": "<framework escolhido ou null>",
-    "database": "<banco escolhido>",
-    "orm": "<orm escolhido ou null>"
-  },
-  "frontend": {
-    "framework": "<framework escolhido ou null>"
-  },
+  "pattern": "<serverless | split | api-only>",
+  "backend": "<framework de backend ou null>",
+  "frontend": "<framework de frontend ou null>",
+  "database": "<banco de dados>",
+  "orm": "<orm ou null>",
   "worktree": <true|false>,
   "pr": {
     "enabled": <true|false>,
@@ -94,6 +99,11 @@ Crie `.claude/sdc.config.json` com as escolhas coletadas:
   }
 }
 ```
+
+Exemplos por padrão:
+- **serverless** (Next.js): `{ "pattern": "serverless", "backend": null, "frontend": "Next.js", "database": "PostgreSQL", "orm": "Prisma" }`
+- **split** (NestJS + React): `{ "pattern": "split", "backend": "NestJS", "frontend": "React+Vite", "database": "PostgreSQL", "orm": "Drizzle" }`
+- **api-only** (FastAPI): `{ "pattern": "api-only", "backend": "FastAPI", "frontend": null, "database": "PostgreSQL", "orm": "SQLAlchemy" }`
 
 ## Passo 4 — Copiar agentes genéricos
 
@@ -105,36 +115,45 @@ Leia cada arquivo em `~/.claude/sdc-templates/agents/` e escreva em `.claude/age
 
 ## Passo 5 — Gerar agentes de stack
 
+Gere os agentes conforme o padrão arquitetural registrado no `sdc.config.json`:
+
+| pattern | Agentes a gerar |
+|---------|-----------------|
+| `serverless` | apenas `frontend.md` (cobre UI e lógica de servidor) |
+| `split` | `backend.md` e `frontend.md` |
+| `api-only` | apenas `backend.md` |
+
 ### backend.md
 
-Leia `~/.claude/sdc-templates/agents/backend.md` como estrutura de referência para as seções esperadas.
+Gere quando `pattern` for `split` ou `api-only`.
 
-Com base nas escolhas do usuário (framework, banco, orm), **gere o conteúdo completo** de `.claude/agents/backend.md`. O arquivo deve:
+Leia `~/.claude/sdc-templates/agents/backend.md` como referência de estrutura e seções esperadas.
 
-- Ter frontmatter com `name: backend`, `description` específica da stack escolhida, `model: claude-sonnet-4-6`
+**Gere o conteúdo completo** de `.claude/agents/backend.md` para o framework escolhido. O arquivo deve:
+
+- Ter frontmatter com `name: backend`, `description` específica da stack, `model: claude-sonnet-4-6`
 - Descrever a stack com versões recomendadas (framework, linguagem, banco, orm, biblioteca de validação)
-- Definir a direção de dependência idiomática do framework (ex: Controller → Service → Repository para NestJS; View → Serializer → Model para Django; Controllers → Services para ASP.NET Core)
-- Mostrar a estrutura de diretórios/módulos convencional do framework
-- Listar convenções de código relevantes: imports, tipos, enums, tratamento de erros, variáveis de ambiente
+- Definir a direção de dependência idiomática do framework
+- Mostrar a estrutura de diretórios/módulos convencional
+- Listar convenções de código: imports, tipos, tratamento de erros, variáveis de ambiente
 - Descrever a ordem de implementação idiomática para uma feature nova
-- Incluir regras absolutas (o que nunca fazer nesta stack)
-
-O nível de especificidade e detalhe deve ser equivalente ao de um template especializado para a stack — não genérico.
-
-Pule este passo se backend = nenhum.
+- Incluir regras absolutas
 
 ### frontend.md
 
-Com base na tecnologia de frontend escolhida, **gere o conteúdo completo** de `.claude/agents/frontend.md`. O arquivo deve:
+Gere quando `pattern` for `split` ou `serverless`.
+
+Leia `~/.claude/sdc-templates/agents/frontend.md` como referência de estrutura.
+
+**Gere o conteúdo completo** de `.claude/agents/frontend.md`. O arquivo deve:
 
 - Ter frontmatter com `name: frontend`, `description` específica, `model: claude-sonnet-4-6`
-- Descrever framework, versão, bibliotecas de estilo e data fetching recomendadas para a stack
-- Definir a estrutura de diretórios convencional
-- Mostrar padrões de código do framework (componentes, state management, roteamento, hooks/composables/signals etc.)
-- Cobrir boas práticas de listagens paginadas, autenticação e tipagem para a stack
+- Para **serverless**: cobrir tanto a UI quanto a lógica de servidor (Server Actions, route handlers, acesso ao banco via ORM) — é o único agente de implementação do projeto
+- Para **split**: cobrir apenas a camada de UI e integração com a API do backend
+- Descrever framework, versão, bibliotecas de estilo e data fetching
+- Mostrar estrutura de diretórios e padrões de código do framework
+- Cobrir boas práticas de paginação, autenticação e tipagem
 - Incluir regras absolutas
-
-Pule este passo se frontend = nenhum.
 
 ## Passo 6 — Copiar commands
 
@@ -156,10 +175,12 @@ Leia `~/.claude/sdc-templates/specs/_template.md` e escreva em `docs/specs/_temp
 
 **Se não existir:** gere um `CLAUDE.md` com as seções abaixo. Use o nome do diretório atual como nome do projeto. Substitua os placeholders com a stack real escolhida.
 
+Para a descrição do projeto: tente inferir a partir do campo `description` do `package.json`, do `README.md` ou de outros arquivos presentes. Se não encontrar, deixe o placeholder para o usuário preencher.
+
 ```markdown
 # <Nome do Projeto>
 
-<Descrição breve do projeto — substitua este placeholder>
+<Descrição inferida do projeto, ou "substitua este placeholder">
 
 ---
 

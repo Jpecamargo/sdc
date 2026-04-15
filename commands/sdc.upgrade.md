@@ -39,17 +39,19 @@ Para cada agente (`architect.md`, `tdd.md`, `design.md`, `docs.md`):
 
 ### 2b. Agente backend
 
-- Leia `~/.claude/sdc-templates/agents/backend.md` como estrutura de referência
-- Leia `backend.framework`, `backend.database` e `backend.orm` de `.claude/sdc.config.json`
+- Gere apenas se `pattern` for `split` ou `api-only`
+- Leia `~/.claude/sdc-templates/agents/backend.md` como referência de estrutura
+- Leia `backend`, `database` e `orm` de `.claude/sdc.config.json`
 - Regenere o conteúdo completo de `.claude/agents/backend.md` para a stack registrada
-- Pule se `backend.framework` for null
 
 ### 2c. Agente frontend
 
-- Leia `~/.claude/sdc-templates/agents/frontend.md` como estrutura de referência
-- Leia `frontend.framework` de `.claude/sdc.config.json`
-- Regenere o conteúdo completo de `.claude/agents/frontend.md` para o framework registrado
-- Pule se `frontend.framework` for null
+- Gere apenas se `pattern` for `split` ou `serverless`
+- Leia `~/.claude/sdc-templates/agents/frontend.md` como referência de estrutura
+- Leia `frontend` e `pattern` de `.claude/sdc.config.json`
+- Para `serverless`: regenere cobrindo UI e lógica de servidor (Server Actions, ORM)
+- Para `split`: regenere cobrindo apenas a camada de UI
+- Regenere o conteúdo completo de `.claude/agents/frontend.md`
 
 ### 2d. Commands do projeto
 

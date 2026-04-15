@@ -6,6 +6,13 @@ Classifique a solicitação e defina o fluxo. Execute sem pedir confirmação a 
 
 > **Features novas:** use `/clarify`. O `orchestrate` cobre apenas bugs, ajustes e refatorações.
 
+## Antes de rotear — verificar agentes disponíveis
+
+Leia os arquivos em `.claude/agents/` para saber quais agentes existem neste projeto. Use apenas agentes disponíveis ao montar o fluxo:
+
+- Se não houver `backend.md`: bugs de servidor, banco ou lógica de negócio vão para `frontend`
+- Adapte a tabela de fluxo abaixo conforme os agentes presentes
+
 ## PR Workflow
 
 Verifique se o `CLAUDE.md` contém `## PR Workflow`.

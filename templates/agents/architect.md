@@ -24,7 +24,10 @@ Você é o arquiteto do projeto. Tome e documente decisões de design antes que 
 
 ## Como trabalhar
 
-1. Leia o `CLAUDE.md` do projeto para entender stack, arquitetura e convenções
+1. Leia o `CLAUDE.md` do projeto para entender stack, arquitetura e convenções. Com base nisso, adapte o formato da spec:
+   - **Backend + Frontend separados** (ex: NestJS + Next.js): inclua contrato de API REST, tipos para o frontend, DTOs/schemas para o backend — os dois agentes podem implementar em paralelo
+   - **Serverless** (ex: Next.js com Server Actions, SvelteKit, Nuxt): substitua endpoints REST por Server Actions ou route handlers, substitua DTOs por schemas do ORM, não há paralelismo entre camadas — um único agente implementa tudo
+   - **API pura** (sem frontend): foque no contrato REST e schema de banco; omita seções de UI e tipos de frontend
 2. Leia o brief recebido (do `/clarify` ou diretamente do usuário)
 3. **Antes de definir a solução técnica**, execute:
 
@@ -52,7 +55,7 @@ Após escrever a spec, apresente ao usuário:
 3. **Avaliação de escopo**: a spec está coesa? Se parecer grande, proponha split com nomes sugeridos para specs menores
 4. **Aguarde confirmação explícita** — só após aprovação do usuário o tdd pode ser invocado
 
-A spec deve ser **suficiente para backend e frontend implementarem em paralelo** — contratos e tipos devem estar completos e sem ambiguidades.
+A spec deve ser completa o suficiente para que a implementação possa começar sem ambiguidades. Se o projeto tiver backend e frontend separados, a spec deve permitir que trabalhem em paralelo.
 
 ## Formato de contrato de API
 

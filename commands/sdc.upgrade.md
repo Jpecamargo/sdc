@@ -2,20 +2,20 @@
 description: Atualiza o plugin SDC global e, se estiver em um projeto inicializado, atualiza também os agentes e commands do projeto.
 ---
 
-Execute os passos abaixo na ordem. O Passo 1 sempre roda. O Passo 2 só roda se o projeto estiver inicializado.
+Execute os passos na ordem. Não avance para o próximo passo sem concluir o atual.
 
 ## Regras — nunca viole
 
 - **Nunca toque** em `docs/specs/` — esses arquivos pertencem ao usuário
 - **Nunca sobrescreva** `CLAUDE.md` — tem contexto específico do projeto
-- No Passo 2, atualize apenas `.claude/agents/` e `.claude/commands/`
+- Atualize apenas `.claude/agents/` e `.claude/commands/`
 - Arquivos em `.claude/` que não existem nos templates: **não toque**
 
 ---
 
 ## Passo 1 — Atualizar o plugin global (sempre)
 
-Execute o script de instalação para atualizar `~/.claude/commands/sdc.*.md` e `~/.claude/sdc-templates/` com a versão mais recente:
+Execute o script de instalação para atualizar `~/.claude/commands/sdc.*.md` e `~/.claude/sdc-templates/`:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Jpecamargo/sdc/main/install.sh)
@@ -23,81 +23,114 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Jpecamargo/sdc/main/install.
 
 ---
 
-## Passo 2 — Atualizar o projeto (somente se inicializado)
+## Passo 2 — Verificar se é um projeto inicializado
 
-Verifique se `.claude/sdc.config.json` existe no diretório atual.
+Verifique se `.claude/sdc.config.json` existe.
 
-**Se não existir:** informe que o plugin foi atualizado e que `/sdc.init` deve ser rodado para inicializar o projeto. Encerre aqui.
+**Se não existir:** informe que o plugin foi atualizado e que `/sdc.init` deve ser rodado para inicializar o projeto. **Encerre aqui — não execute os passos seguintes.**
 
-**Se existir:** leia o campo `_version` para determinar o formato atual e aplicar as migrações necessárias em cadeia até a versão mais recente (`"3"`).
-
-### Migração v1 → v2 (sem `_version`, com `backend.framework` aninhado)
-
-Identificação: config não tem `_version` E tem `backend` como objeto com `framework` dentro.
-
-```json
-// formato v1
-{ "backend": { "framework": "NestJS", "database": "PostgreSQL", "orm": "Drizzle" }, "frontend": { "framework": "Next.js" } }
-```
-
-Transformação:
-1. Infira o `pattern`:
-   - `backend.framework` null + `frontend.framework` presente → `serverless`
-   - Ambos presentes → `split`
-   - `backend.framework` presente + `frontend.framework` null → `api-only`
-2. Achate a estrutura: `backend.framework` → `backend`, `frontend.framework` → `frontend`, `backend.database` → `database`, `backend.orm` → `orm`
-3. Escreva o config com `_version: "2"` e `pattern` adicionados
-
-### Migração v2 → v3 (tem `pattern` mas sem `_version`)
-
-Identificação: config tem `pattern` mas não tem `_version`.
-
-Transformação: adicione `"_version": "3"` ao config. Nenhuma outra mudança estrutural.
+**Se existir:** continue para o Passo 3.
 
 ---
 
-Após aplicar todas as migrações necessárias, informe o usuário quais versões foram percorridas e exiba o config final. Se o `pattern` foi inferido (migração v1→v2), pergunte se está correto antes de continuar.
+## Passo 3 — Migrar o sdc.config.json (obrigatório)
 
-### 2a. Agentes genéricos
+Leia `.claude/sdc.config.json` e identifique a versão:
 
-Para cada agente (`architect.md`, `tdd.md`, `design.md`, `docs.md`):
-- Leia a versão em `~/.claude/sdc-templates/agents/`
-- Sobrescreva `.claude/agents/<agente>.md`
+### Config v1 (sem `_version`, campo `backend` é um objeto)
 
-### 2b. Agente backend
+```json
+{ "backend": { "framework": "...", "database": "...", "orm": "..." }, "frontend": { "framework": "..." } }
+```
 
-- Gere apenas se `pattern` for `split` ou `api-only`
+Transforme para o formato atual:
+
+1. Infira o `pattern`:
+   - `backend.framework` é null e `frontend.framework` existe → `serverless`
+   - Ambos existem → `split`
+   - `frontend.framework` é null e `backend.framework` existe → `api-only`
+2. Escreva o novo `.claude/sdc.config.json`:
+
+```json
+{
+  "_version": "3",
+  "pattern": "<inferido>",
+  "backend": "<backend.framework>",
+  "frontend": "<frontend.framework>",
+  "database": "<backend.database>",
+  "orm": "<backend.orm>",
+  "worktree": <valor existente>,
+  "pr": <valor existente>
+}
+```
+
+3. Mostre o config migrado ao usuário e pergunte se o `pattern` inferido está correto. Aguarde confirmação antes de continuar.
+
+### Config v2 (tem `pattern`, sem `_version`)
+
+Adicione `"_version": "3"` e salve. Informe o usuário.
+
+### Config v3 (tem `_version: "3"`)
+
+Nenhuma migração necessária. Continue.
+
+**Após concluir este passo**, leia o `pattern` do config já migrado e use-o nos passos seguintes.
+
+---
+
+## Passo 4 — Atualizar agentes genéricos
+
+Para cada agente, leia de `~/.claude/sdc-templates/agents/` e sobrescreva em `.claude/agents/`:
+- `architect.md`
+- `tdd.md`
+- `design.md`
+- `docs.md`
+
+---
+
+## Passo 5 — Regenerar agentes de stack
+
+Use o `pattern` do config migrado (Passo 3).
+
+**Se `pattern` for `split` ou `api-only`** — regenere `backend.md`:
 - Leia `~/.claude/sdc-templates/agents/backend.md` como referência de estrutura
-- Leia `backend`, `database` e `orm` de `.claude/sdc.config.json`
-- Regenere o conteúdo completo de `.claude/agents/backend.md` para a stack registrada
+- Leia `backend`, `database` e `orm` do config
+- Gere o conteúdo completo de `.claude/agents/backend.md` para a stack registrada
 
-### 2c. Agente frontend
-
-- Gere apenas se `pattern` for `split` ou `serverless`
+**Se `pattern` for `split` ou `serverless`** — regenere `frontend.md`:
 - Leia `~/.claude/sdc-templates/agents/frontend.md` como referência de estrutura
-- Leia `frontend` e `pattern` de `.claude/sdc.config.json`
-- Para `serverless`: regenere cobrindo UI e lógica de servidor (Server Actions, ORM)
-- Para `split`: regenere cobrindo apenas a camada de UI
-- Regenere o conteúdo completo de `.claude/agents/frontend.md`
+- Leia `frontend` e `pattern` do config
+- `serverless`: cubra UI e lógica de servidor (Server Actions, ORM)
+- `split`: cubra apenas a camada de UI
+- Gere o conteúdo completo de `.claude/agents/frontend.md`
 
-### 2d. Commands do projeto
+---
 
-Para cada command (`orchestrate.md`, `clarify.md`, `commit.md`, `test.md`, `refine.md`, `pr.md`):
-- Leia a versão em `~/.claude/sdc-templates/commands/`
-- Sobrescreva `.claude/commands/<command>.md`
+## Passo 6 — Atualizar commands do projeto
 
-### 2e. PR Workflow
+Para cada command, leia de `~/.claude/sdc-templates/commands/` e sobrescreva em `.claude/commands/`:
+- `orchestrate.md`
+- `clarify.md`
+- `commit.md`
+- `test.md`
+- `refine.md`
+- `pr.md`
+
+---
+
+## Passo 7 — Verificar PR Workflow
 
 - Leia o `CLAUDE.md` do projeto
-- Se **não** contiver `## PR Workflow` e `sdc.config.json` tiver `pr.enabled: false`, pergunte:
-  > "Deseja ativar o PR workflow? (sim/não) — se sim, qual é a branch base? (ex: `main`)"
-- Se sim: atualize `sdc.config.json` e adicione a seção ao CLAUDE.md
+- Se **não** contiver `## PR Workflow` e o config tiver `pr.enabled: false`, pergunte:
+  > "Deseja ativar o PR workflow? (sim/não) — se sim, qual é a branch base?"
+- Se sim: atualize o config e adicione a seção ao CLAUDE.md
 - Se o CLAUDE.md já contiver `## PR Workflow`: não toque
 
 ---
 
 ## Resultado
 
-Ao final, liste:
+Ao final, exiba:
 - **Plugin global**: atualizado
-- **Projeto**: atualizado (com a lista de arquivos) ou "não inicializado — rode `/sdc.init` para começar"
+- **Config**: versão anterior → v3 (ou "já estava na v3")
+- **Arquivos atualizados**: lista completa
